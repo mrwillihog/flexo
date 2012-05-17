@@ -32,7 +32,7 @@ if ( typeof Object.create !== 'function' ) {
         $style;
       // Only add the style if it doesn't already exist
       if ($('#flexo-style').length === 0) {
-        styles.push( '.flexo-container  .flexo-image { float: left; overflow: hidden; margin: ' + self.options.margin + 'px; padding: 0; line-height: 0; }' );
+        styles.push( '.flexo-container  .flexo-image { float: left; overflow: hidden; margin: ' + self.options.margin + 'px; padding: 0; line-height: 0; background-color: rgba(0,0,0,0.2); }' );
         styles.push( '.flexo-container .flexo-image img { marign: 0; padding: 0; }' );
         styles.push( '.flexo-container:after { content: "."; visibility: hidden; display: block; height: 0; clear:both; }' );
         styles.push( '.flexo-container .flexo-image:hover { cursor: pointer; }');
@@ -94,7 +94,8 @@ if ( typeof Object.create !== 'function' ) {
           maxWidth = self.$element.width(),
           currentWidth = 0,
           imageStack = [],
-          minHeight = Infinity;
+          minHeight = Infinity,
+          i = 0;
 
 
       // Calculates the number of pixels to reduce each image by
@@ -102,22 +103,24 @@ if ( typeof Object.create !== 'function' ) {
       function calculateWidthReductions( images, overlap ) {
         var reductions   = [],
             totalWidth   = 0,
-            totalReduced = 0;
+            totalReduced = 0,
+            i = 0,
+            numImages = images.length;
 
-        for (var i = 0; i < images.length; i++) {
+        for ( ; i < numImages; i++ ) {
           totalWidth += images[i].width;
         }
 
-        for (var j = 0; j < images.length; j++) {
-          var fraction = images[j].width / totalWidth;
-          reductions[j] = Math.floor( fraction * overlap );
-          totalReduced += reductions[j];
+        for ( i = 0; i < numImages; i++ ) {
+          var fraction = images[i].width / totalWidth;
+          reductions[i] = Math.floor( fraction * overlap );
+          totalReduced += reductions[i];
         }
 
         var pixelsRemaining = overlap - totalReduced;
         while ( pixelsRemaining > 0 ) {
-          for (var k = 0; k < reductions.length; k++) {
-            reductions[k] += 1;
+          for ( i = 0; i < numImages; i++ ) {
+            reductions[i] += 1;
             pixelsRemaining -= 1;
             if ( pixelsRemaining === 0 ) {
               break;
@@ -132,7 +135,8 @@ if ( typeof Object.create !== 'function' ) {
         var numImages = images.length,
             reduction = Math.floor( overlap / numImages ),
             additionalPixels = overlap % numImages,
-            reductions = calculateWidthReductions( images, overlap );
+            reductions = calculateWidthReductions( images, overlap ),
+            i = 0;
 
         // Limit the height if the option has been passed
         if ( self.options.maxHeight ) {
@@ -140,7 +144,7 @@ if ( typeof Object.create !== 'function' ) {
         }
 
 
-        for (var i = 0; i < numImages; i++) {
+        for ( ; i < numImages; i++ ) {
           var res = images[i],
               $container = $('<div></div>', {
                 'class': 'flexo-image',
@@ -149,6 +153,8 @@ if ( typeof Object.create !== 'function' ) {
               }).append($('<img />', {
                 src: res.url
               }).css({
+                width: res.width,
+                height: res.height,
                 'margin-left': -(Math.floor(reductions[i] / 2)),
                 'margin-top': -(res.height - minHeight) / 2
               }));
@@ -160,16 +166,22 @@ if ( typeof Object.create !== 'function' ) {
 
       self.processedImages = [];
 
-      for (var i = 0; i < results.length; i++) {
-        var res = results[i],
-            width = res.width;
+      for ( ; i < results.length; i++ ) {
+        var res = results[i];
+
+        if ( res.height > self.options.maxHeight ) {
+          res.width = Math.floor(self.options.maxHeight / res.height * res.width);
+          res.height = self.options.maxHeight;
+        }
+
+        var width = res.width;
 
         imageStack.push( res );
         currentWidth += width + self.options.margin * 2;
         if ( res.height < minHeight ) {
           minHeight = res.height;
         }
-        if (currentWidth >= maxWidth ) {
+        if ( currentWidth >= maxWidth ) {
           processRow( imageStack, currentWidth - maxWidth, minHeight );
           imageStack.length = 0;
           currentWidth = 0;
@@ -213,7 +225,7 @@ if ( typeof Object.create !== 'function' ) {
 
   $.fn.flexo.options = {
     margin: 3,
-    maxHeight: false,
+    maxHeight: 240,
     resize: true,
     append: true
   };
