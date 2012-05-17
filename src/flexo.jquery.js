@@ -32,10 +32,10 @@ if ( typeof Object.create !== 'function' ) {
         $style;
       // Only add the style if it doesn't already exist
       if ($('#flexo-style').length === 0) {
-        styles.push( '.flexo-container  .flexo-image { float: left; overflow: hidden; margin: ' + self.options.margin + 'px; padding: 0; line-height: 0; background-color: rgba(0,0,0,0.2); }' );
+        styles.push( '.flexo-container  .flexo-image { cursor: pointer; float: left; overflow: hidden; margin: ' + self.options.style.margin + 'px; padding: 0; line-height: 0; background-color: rgba(0,0,0,0.2); }' );
         styles.push( '.flexo-container .flexo-image img { marign: 0; padding: 0; }' );
         styles.push( '.flexo-container:after { content: "."; visibility: hidden; display: block; height: 0; clear:both; }' );
-        styles.push( '.flexo-container .flexo-image:hover { cursor: pointer; }');
+        styles.push( '.flexo-container .flexo-image:hover {   -webkit-box-shadow: ' + self.options.style.outline + ' 0px 0px 6px 2px; -moz-box-shadow: ' + self.options.style.outline + ' 0px 0px 6px 2px; box-shadow: ' + self.options.style.outline + ' 0px 0px 6px 2px; -webkit-transition: -webkit-box-shadow 0.3s ease-in-out; -moz-transition: -moz-box-shadow 0.3s ease-in-out; transition: box-shadow 0.3s ease-in-out; }');
         self.$element.addClass( 'flexo-container' );
         $style = $( '<style></style>', {
           type: 'text/css',
@@ -177,7 +177,7 @@ if ( typeof Object.create !== 'function' ) {
         var width = res.width;
 
         imageStack.push( res );
-        currentWidth += width + self.options.margin * 2;
+        currentWidth += width + self.options.style.margin * 2;
         if ( res.height < minHeight ) {
           minHeight = res.height;
         }
@@ -224,10 +224,13 @@ if ( typeof Object.create !== 'function' ) {
   };
 
   $.fn.flexo.options = {
-    margin: 3,
     maxHeight: 240,
     resize: true,
-    append: true
+    append: true,
+    style: {
+      outline: '#1C88A8',
+      margin: 3
+    }
   };
 
 }( jQuery, window, document ));
