@@ -50,7 +50,7 @@ if ( typeof Object.create !== 'function' ) {
       });
       // set container width
       self.$element.css({
-        width: self.$element.width()
+        width: Math.max(self.options.minContainerWidth, self.$element.width())
       });
     },
 
@@ -225,6 +225,7 @@ if ( typeof Object.create !== 'function' ) {
 
   $.fn.flexo.options = {
     maxHeight: 240,
+    minContainerWidth: 600,
     resize: true,
     append: true,
     style: {
