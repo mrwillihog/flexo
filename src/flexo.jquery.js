@@ -35,7 +35,7 @@ if ( typeof Object.create !== 'function' ) {
         styles.push( '.flexo-container  .flexo-image { cursor: pointer; float: left; overflow: hidden; margin: ' + self.options.style.margin + 'px; padding: 0; line-height: 0; background-color: rgba(0,0,0,0.2); }' );
         styles.push( '.flexo-container .flexo-image img { marign: 0; padding: 0; }' );
         styles.push( '.flexo-container:after { content: "."; visibility: hidden; display: block; height: 0; clear:both; }' );
-        styles.push( '.flexo-container .flexo-image:hover {   -webkit-box-shadow: ' + self.options.style.outline + ' 0px 0px 6px 2px; -moz-box-shadow: ' + self.options.style.outline + ' 0px 0px 6px 2px; box-shadow: ' + self.options.style.outline + ' 0px 0px 6px 2px; -webkit-transition: -webkit-box-shadow 0.3s ease-in-out; -moz-transition: -moz-box-shadow 0.3s ease-in-out; transition: box-shadow 0.3s ease-in-out; }');
+        styles.push( '.flexo-container .flexo-image:hover {   -webkit-box-shadow: ' + self.options.style.outline + ' 0px 0px 6px 2px; -moz-box-shadow: ' + self.options.style.outline + ' 0px 0px 6px 2px; box-shadow: ' + self.options.style.outline + ' 0px 0px 6px 2px; -webkit-transition: -webkit-box-shadow 0.1s ease-in-out; -moz-transition: -moz-box-shadow 0.1s ease-in-out; transition: box-shadow 0.1s ease-in-out; }');
         self.$element.addClass( 'flexo-container' );
         $style = $( '<style></style>', {
           type: 'text/css',
@@ -44,14 +44,17 @@ if ( typeof Object.create !== 'function' ) {
         $('body').append( $style );
       }
 
-      // remove container width
-      self.$element.css({
-        width: '100%'
-      });
-      // set container width
-      self.$element.css({
-        width: Math.max(self.options.minContainerWidth, self.$element.width())
-      });
+
+      if ( !self.options.fixedSize ) {
+        // remove container width
+        self.$element.css({
+          width: '100%'
+        });
+        // set container width
+        self.$element.css({
+          width: Math.max(self.options.minContainerWidth, self.$element.width())
+        });
+      }
     },
 
     // Control the flow of execution
@@ -71,21 +74,27 @@ if ( typeof Object.create !== 'function' ) {
           timer,
           $window = $(window),
           width = $window.width();
-
-      // attach to the window
-      $( window ).resize(function ( event ) {
-        if ( timer !== false ) {
-          clearTimeout( timer );
-          timer = setTimeout(function () {
-            if(width !== $window.width()) {
-              self.attachStyle();
-              self.build( self.originalImages );
-              self.display( false );
-              width = $window.width();
-            }
-          }, 250);
-        }
-      });
+      // Don't resize if it is a fixed size gallery
+      if ( !self.options.fixedSize ) {
+        // attach to the window
+        $( window ).resize(function ( event ) {
+          if ( timer !== false ) {
+            clearTimeout( timer );
+            timer = setTimeout(function () {
+              // If the resize has caused the width to change
+              if(width !== $window.width()) {
+                self.transition('out');
+                self.attachStyle();
+                self.build( self.originalImages );
+                self.display( false );
+                self.transition('in');
+                // Keep tabs on the new width
+                width = $window.width();
+              }
+            }, 250);
+          }
+        });
+      }
     },
 
     // Builds the image HTML
@@ -200,19 +209,22 @@ if ( typeof Object.create !== 'function' ) {
         for ( var i = 0; i < self.processedImages.length; i++ ) {
           self.$element.append( self.processedImages[i] );
         }
-        self.$element.fadeIn(100);
       };
 
       if ( !append ) {
-        self.$element.fadeOut(100, function () {
-          self.$element.empty();
-          attachElements();
-        });
-      } else {
-        attachElements();
+        self.$element.empty();
       }
 
+      attachElements();
+    },
 
+    transition: function( direction ) {
+      var self = this;
+      if (direction === 'out' ) {
+        self.$element.fadeOut(100);
+      } else {
+        self.$element.fadeIn(750);
+      }
     }
   };
 
@@ -228,6 +240,7 @@ if ( typeof Object.create !== 'function' ) {
     minContainerWidth: 600,
     resize: true,
     append: true,
+    fixedSize: false,
     style: {
       outline: '#1C88A8',
       margin: 3
