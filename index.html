@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Flexo</title>
+    <style>
+      #main-page {
+        padding: 10px 40px;
+        margin:auto;
+      }
+
+      .gallery {
+        width: 100%;
+        background: whiteSmoke;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="main-page">
+      <h1>Flexo</h1>
+      <div class="gallery"></div>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.18/jquery-ui.js"></script>
+    <script type="text/javascript" src="src/flexo.jquery.js"></script>
+    <script>
+      (function() {
+        $.ajax({
+          url: 'http://api.dribbble.com/shots/popular?per_page=30',
+          dataType: 'jsonp'
+        }).done(function ( results ) {
+          var images = $.map(results.shots, function (item, index) {
+            return { url: item.image_url, height: item.height, width: item.width }
+          });
+          $('.gallery').flexo( images );
+        });
+      })();
+    </script>
+  </body>
+</html>
