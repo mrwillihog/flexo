@@ -1,4 +1,4 @@
 flexo
 =====
 
-Flexible image gallery
+jQuery plugin for a flexible image gallery.
